@@ -6,7 +6,7 @@ import mediapipe as mp
 
 def npy_gen(data_path):
     mp_hands = mp.solutions.hands
-    classes_folders = ["paper", "rock", "scissors"]
+    classes_folders = ["бумага", "камень", "лайк", "дизлайк", "коза", "ножницы"]
     modes = ["train", "test"]
 
     for mode in modes:
@@ -30,7 +30,7 @@ def npy_gen(data_path):
                         static_image_mode=True,
                         max_num_hands=1,
                         min_detection_confidence=0.7) as hands:
-                    results = hands.process(cv2.flip(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), 1))
+                    results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
                     if results.multi_hand_landmarks:
                         for hand_landmarks in results.multi_hand_landmarks:
@@ -56,3 +56,5 @@ def npy_gen(data_path):
 
         np.save(os.path.join(data_path, f"{mode}_coords.npy"), coords_list)
         np.save(os.path.join(data_path, f"{mode}_labels.npy"), labels_list)
+
+
