@@ -1,20 +1,21 @@
 import os
 import argparse
 from PreProcess import npy_gen
-from train import train
+from train import train, train_cnn
 from classic_learning import learning
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', type=int, default=0, help='gpu id')
-    parser.add_argument('--mode', type=str, default="preprocessing", choices=['preprocessing',
-                                                                        'classic',
-                                                                          'train',
-                                                                          'test',
-                                                                          'inference'],
+    parser.add_argument('--mode', type=str, default="train", choices=['preprocessing',
+                                                                      'classic',
+                                                                      'train',
+                                                                      'test',
+                                                                      'inference'],
                         help='Mode')
-    parser.add_argument('--data_path', type=str, default="/Users/illusivesheep/Repositories/ультра датасет", required=False,
+    parser.add_argument('--data_path', type=str, default="/Users/illusivesheep/Repositories/ультра датасет",
+                        required=False,
                         help='Path to npy files')
     parser.add_argument('--log_path', type=str, default="log", required=False,
                         help='Path to log directory')
@@ -36,11 +37,10 @@ def start_mode():
     if args.mode == "preprocessing":
         npy_gen(args.data_path)
     elif args.mode == "train":
-        train(args)
+        train_cnn(args)
     elif args.mode == "classic":
         learning(args)
 
 
 if __name__ == '__main__':
     start_mode()
-
