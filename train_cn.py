@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from torch import nn
 
 from model_cn import GestureModel
-from dataset import GestureDataset
+from dataset import GestureDatasetDots
 
 
 def train(args):
@@ -22,10 +22,10 @@ def train(args):
     x_val = np.load(os.path.join(args.data_path, f"val_coords.npy"))
     y_val = np.load(os.path.join(args.data_path, f"val_labels.npy"))
 
-    train_dataset = GestureDataset(x_train, y_train)
+    train_dataset = GestureDatasetDots(x_train, y_train)
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size)
 
-    val_dataset = GestureDataset(x_val, y_val)
+    val_dataset = GestureDatasetDots(x_val, y_val)
     val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size)
 
     random.seed(0)
