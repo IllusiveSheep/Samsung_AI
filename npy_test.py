@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-hands = np.load("/Users/illusivesheep/Repositories/data/test_coords.npy")
-labels = np.load("/Users/illusivesheep/Repositories/data/test_labels.npy")
+hands = np.load("/Users/illusivesheep/Repositories/ультра датасет/train_coords.npy")
+labels = np.load("/Users/illusivesheep/Repositories/ультра датасет/train_labels.npy")
 
 blank_im = np.zeros((300, 300, 3), np.uint8)
 print(labels[0])
