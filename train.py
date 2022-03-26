@@ -140,11 +140,13 @@ def train_cnn(args):
     train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size)
     val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size)
 
+    model_hand.train()
+    model_dot_hand.train()
+    model_fuzing_hand.train()
+
     for e in range(args.epochs):
 
-        model_hand.train()
-        model_dot_hand.train()
-        model_fuzing_hand.train()
+        print('epoch - {0}'.format(e))
 
         running_loss = 0.0
         precision = 0
