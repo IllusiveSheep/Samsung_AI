@@ -8,3 +8,6 @@ model_cn.py
 npy_test.py
 train_cn.py
 /Untitled.ipynb
+get-pip.py
+hand_modelresnet18.pth
+/venv/

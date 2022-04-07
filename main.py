@@ -1,4 +1,5 @@
 import os
+import torch
 import argparse
 from PreProcess import npy_gen
 from train import train, train_cnn
@@ -14,7 +15,7 @@ def parse_args():
                                                                       'test',
                                                                       'inference'],
                         help='Mode')
-    parser.add_argument('--data_path', type=str, default="/Users/illusivesheep/Repositories/ультра датасет",
+    parser.add_argument('--data_path', type=str, default="D:\Загрузки\ультра датасет",
                         required=False,
                         help='Path to npy files')
     parser.add_argument('--log_path', type=str, default="log", required=False,
@@ -34,10 +35,11 @@ def parse_args():
 
 def start_mode():
     args = parse_args()
+    device = torch.device(args.gpu)
     if args.mode == "preprocessing":
         npy_gen(args.data_path)
     elif args.mode == "train":
-        train_cnn(args)
+        train_cnn(args, device)
     elif args.mode == "classic":
         learning(args)
 

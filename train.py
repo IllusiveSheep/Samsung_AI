@@ -101,7 +101,7 @@ def train(args):
         # print('epoch = %d val_loss = %.4f' % (e, running_val_loss))
 
 
-def train_cnn(args):
+def train_cnn(args, device):
     model_hand, model_dot_hand = prepare_models("resnet18", "resnet18")
     model_hand = nn.Sequential(*(list(model_hand.children())[:-1]))
     model_dot_hand = nn.Sequential(*(list(model_dot_hand.children())[:-1]))
@@ -130,9 +130,9 @@ def train_cnn(args):
 
     scheduler = StepLR(opt, step_size=10, gamma=0.1)
 
-    # model_fuzing_hand.to(device)
-    # model_dot_hand.to(device)
-    # model_hand.to(device)
+    model_fuzing_hand.to(device)
+    model_dot_hand.to(device)
+    model_hand.to(device)
 
     train_dataset = GestureDatasetPics(os.path.join(args.data_path, "dots/train_dots.csv"))
     val_dataset = GestureDatasetPics(os.path.join(args.data_path, "dots/test_dots.csv"))
@@ -153,6 +153,10 @@ def train_cnn(args):
         accuracy = 0
 
         for x_hand, x_dot, y in iter(tqdm.tqdm(train_dataloader)):
+            x_hand.to(device)
+            x_dot.to(device)
+            y.to(device)
+
             opt.zero_grad()
             hand_prediction = model_hand(x_hand)
             dot_prediction = model_dot_hand(x_dot)
@@ -208,6 +212,10 @@ def train_cnn(args):
         accuracy = 0
 
         for x_hand, x_dot, y in iter(tqdm.tqdm(val_dataloader)):
+            x_hand.to(device)
+            x_dot.to(device)
+            y.to(device)
+
             with torch.no_grad():
                 hand_prediction = model_hand(x_hand)
                 dot_prediction = model_dot_hand(x_dot)

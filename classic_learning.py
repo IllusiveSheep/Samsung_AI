@@ -6,7 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 
 import matplotlib.pyplot as plt
-import seaborn as sns
+# import seaborn as sns
 
 
 def learning(args):
