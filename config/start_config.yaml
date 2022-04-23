@@ -1,0 +1,11 @@
+gpu: 0
+mode: train # preprocessing, classic, train', test',inference
+data_path: /home/evg_sber/PycharmProjects/Samsung_AI/Data/ультра датасет
+log_path: log
+model_path: models
+learning_rate: 0.0001
+weight_decay: 0.0005
+loss_type: MSE #L2, Smooth L1, MSE
+epochs: 200
+batch_size: 128
+pretrained_models: False

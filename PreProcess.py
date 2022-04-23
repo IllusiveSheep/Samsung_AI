@@ -5,7 +5,7 @@ import mediapipe as mp
 import pandas as pd
 
 
-def npy_gen(path_dataset):
+def csv_gen(path_dataset):
     df = pd.DataFrame()
 
     modes = ["train", "test"]

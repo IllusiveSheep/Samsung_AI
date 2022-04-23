@@ -1,13 +1,10 @@
 import os
 
-import sklearn.metrics
 import tqdm
 import random
 import numpy as np
 
-import torchvision
 from torch.utils.tensorboard import SummaryWriter
-from torchvision import datasets, transforms
 
 import torch
 import torch.optim as optim
@@ -23,34 +20,34 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, \
 from prepare_models import prepare_models
 
 
-def train(args):
+def train(config_data):
     model = GestureModel(100)
 
     writer_train = SummaryWriter("tensor_board_graphs/train")
     writer_test = SummaryWriter("tensor_board_graphs/test")
 
-    x_train = np.load(os.path.join(args.data_path, "npy", f"train_coords.npy"))
-    y_train = np.load(os.path.join(args.data_path, "npy", f"train_labels.npy"))
+    x_train = np.load(os.path.join(config_data.data_path, "npy", f"train_coords.npy"))
+    y_train = np.load(os.path.join(config_data.data_path, "npy", f"train_labels.npy"))
 
-    x_val = np.load(os.path.join(args.data_path, "npy", f"val_coords.npy"))
-    y_val = np.load(os.path.join(args.data_path, "npy", f"val_labels.npy"))
+    x_val = np.load(os.path.join(config_data.data_path, "npy", f"val_coords.npy"))
+    y_val = np.load(os.path.join(config_data.data_path, "npy", f"val_labels.npy"))
 
     train_dataset = GestureDatasetDots(x_train, y_train)
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size)
+    train_dataloader = DataLoader(train_dataset, batch_size=config_data.batch_size)
 
     val_dataset = GestureDatasetDots(x_val, y_val)
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size)
+    val_dataloader = DataLoader(val_dataset, batch_size=config_data.batch_size)
 
     random.seed(0)
     np.random.seed(0)
     torch.manual_seed(0)
     torch.cuda.manual_seed(0)
 
-    opt = optim.Adam([{'params': list(model.parameters()), 'lr': args.learning_rate}], weight_decay=args.weight_decay)
+    opt = optim.Adam([{'params': list(model.parameters()), 'lr': config_data.learning_rate}], weight_decay=config_data.weight_decay)
     scheduler = StepLR(opt, step_size=10, gamma=0.1)
     loss = nn.CrossEntropyLoss()
 
-    for e in range(args.epochs):
+    for e in range(config_data.epochs):
         model.train()
         running_loss = 0.0
         precision = 0
@@ -65,7 +62,7 @@ def train(args):
             #     for gesture in cur_x:
             #         if max
 
-            precision += precision_score(y, torch.max(prediction.data, 1)[1], average='micro')
+            precision += precision_score(y.view(-1).cpu(), torch.max(prediction.data.cpu(), 1)[1], average='micro')
             # print(precision)
             loss_batch = loss(prediction, y) / len(y)
             loss_batch.backward()
@@ -90,7 +87,7 @@ def train(args):
         for x, y in iter(tqdm.tqdm(val_dataloader)):
             with torch.no_grad():
                 prediction = model(x)
-                precision += precision_score(y, torch.max(prediction.data, 1)[1], average='micro')
+                precision += precision_score(y.view(-1).cpu(), torch.max(prediction.data.cpu(), 1)[1], average='micro')
                 loss_val_batch = loss(prediction, y) / len(y)
                 running_val_loss += loss_val_batch.item()
 
@@ -101,7 +98,7 @@ def train(args):
         # print('epoch = %d val_loss = %.4f' % (e, running_val_loss))
 
 
-def train_cnn(args, device):
+def train_cnn(config_data, device):
     model_hand, model_dot_hand = prepare_models("resnet18", "resnet18")
     model_hand = nn.Sequential(*(list(model_hand.children())[:-1]))
     model_dot_hand = nn.Sequential(*(list(model_dot_hand.children())[:-1]))
@@ -123,24 +120,24 @@ def train_cnn(args, device):
 
     opt = optim.Adam([{'params': (list(model_hand.parameters()) +
                                   list(model_dot_hand.parameters())),
-                       'lr': args.learning_rate},
+                       'lr': config_data.learning_rate},
                       {'params': list(model_fuzing_hand.parameters()),
-                       'lr': args.learning_rate},
-                      ], weight_decay=args.weight_decay)
+                       'lr': config_data.learning_rate},
+                      ], weight_decay=config_data.weight_decay)
 
     scheduler = StepLR(opt, step_size=10, gamma=0.1)
 
-    model_fuzing_hand.to(device)
-    model_dot_hand.to(device)
-    model_hand.to(device)
+    model_fuzing_hand = model_fuzing_hand.to(device)
+    model_dot_hand = model_dot_hand.to(device)
+    model_hand = model_hand.to(device)
 
-    train_dataset = GestureDatasetPics(os.path.join(args.data_path, "dots/train_dots.csv"))
-    val_dataset = GestureDatasetPics(os.path.join(args.data_path, "dots/test_dots.csv"))
+    train_dataset = GestureDatasetPics(os.path.join(config_data.data_path, "dots/train_dots.csv"))
+    val_dataset = GestureDatasetPics(os.path.join(config_data.data_path, "dots/test_dots.csv"))
 
-    train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size)
-    val_dataloader = DataLoader(val_dataset, batch_size=args.batch_size)
+    train_dataloader = DataLoader(train_dataset, batch_size=config_data.batch_size)
+    val_dataloader = DataLoader(val_dataset, batch_size=config_data.batch_size)
 
-    for e in range(args.epochs):
+    for e in range(config_data.epochs):
 
         model_hand.train()
         model_dot_hand.train()
@@ -153,23 +150,26 @@ def train_cnn(args, device):
         accuracy = 0
 
         for x_hand, x_dot, y in iter(tqdm.tqdm(train_dataloader)):
-            x_hand.to(device)
-            x_dot.to(device)
-            y.to(device)
+            x_hand = x_hand.to(device)
+            x_dot = x_dot.to(device)
+            y = y.to(device)
 
             opt.zero_grad()
             hand_prediction = model_hand(x_hand)
             dot_prediction = model_dot_hand(x_dot)
             prediction = model_fuzing_hand(hand_prediction, dot_prediction)
 
-            precision += precision_score(y, torch.max(prediction.data, 1)[1],
+            prediction_for_metrics = torch.max(prediction.data.cpu(), 1)[1]
+            target_for_metrics = y.view(-1).cpu()
+
+            precision += precision_score(target_for_metrics, prediction_for_metrics,
                                          average='micro')
-            f1 += f1_score(y, torch.max(prediction.data, 1)[1],
+            f1 += f1_score(target_for_metrics, prediction_for_metrics,
                            average='micro',
                            zero_division='warn')
             # classification += classification_report(y, torch.max(prediction.data, 1)[1],
             #                                         labels=[0, 1, 2, 3, 4, 5])
-            accuracy += accuracy_score(y, torch.max(prediction.data, 1)[1])
+            accuracy += accuracy_score(target_for_metrics, prediction_for_metrics,)
 
             loss_batch = loss(prediction, y) / len(y)
             loss_batch.backward()
@@ -194,13 +194,13 @@ def train_cnn(args, device):
         # print('precision = %.4f' % (precision))
 
         # Save models
-        torch.save(model_hand, os.path.join(args.model_path,
+        torch.save(model_hand, os.path.join(config_data.model_path,
                                             'model_hand',
                                             'model{0}.pth'.format(e)))
-        torch.save(model_dot_hand, os.path.join(args.model_path,
+        torch.save(model_dot_hand, os.path.join(config_data.model_path,
                                                 'model_dot_hand',
                                                 'model{0}.pth'.format(e)))
-        torch.save(model_fuzing_hand, os.path.join(args.model_path,
+        torch.save(model_fuzing_hand, os.path.join(config_data.model_path,
                                                    'model_fuzing_hand',
                                                    'model{0}.pth'.format(e)))
 
@@ -212,23 +212,26 @@ def train_cnn(args, device):
         accuracy = 0
 
         for x_hand, x_dot, y in iter(tqdm.tqdm(val_dataloader)):
-            x_hand.to(device)
-            x_dot.to(device)
-            y.to(device)
+            x_hand = x_hand.to(device)
+            x_dot = x_dot.to(device)
+            y = y.to(device)
 
             with torch.no_grad():
                 hand_prediction = model_hand(x_hand)
                 dot_prediction = model_dot_hand(x_dot)
                 prediction = model_fuzing_hand(hand_prediction, dot_prediction)
 
-                precision += precision_score(y, torch.max(prediction.data, 1)[1],
+                prediction_for_metrics = torch.max(prediction.data.cpu(), 1)[1]
+                target_for_metrics = y.view(-1).cpu()
+
+                precision += precision_score(target_for_metrics, prediction_for_metrics,
                                              average='micro')
-                f1 += f1_score(y, torch.max(prediction.data, 1)[1],
+                f1 += f1_score(target_for_metrics, prediction_for_metrics,
                                average='micro',
                                zero_division='warn')
                 # classification += classification_report(y, torch.max(prediction.data, 1)[1],
                 #                                         labels=[0, 1, 2, 3, 4, 5])
-                accuracy += accuracy_score(y, torch.max(prediction.data, 1)[1])
+                accuracy += accuracy_score(target_for_metrics, prediction_for_metrics)
 
                 loss_val_batch = loss(prediction, y) / len(y)
                 running_val_loss += loss_val_batch.item()

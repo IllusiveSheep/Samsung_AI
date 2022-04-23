@@ -11,3 +11,4 @@ train_cn.py
 get-pip.py
 hand_modelresnet18.pth
 /venv/
+/Data/
