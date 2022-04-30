@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class StartConfig:
     gpu: int
-    mode: str
+    mode: list
     data_path: str
     log_path: str
     model_path: str

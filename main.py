@@ -14,7 +14,8 @@ def start_mode():
     start_modes = {"preprocessing": csv_gen(start_config.data_path),
                    "train": train_cnn(start_config, device), "classic": learning(start_config)}
 
-    _ = start_modes[start_config.mode]
+    for mode in start_modes[start_config.mode]:
+        _ = start_modes[mode]
 
 
 if __name__ == '__main__':

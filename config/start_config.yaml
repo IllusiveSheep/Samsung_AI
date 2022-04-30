@@ -1,5 +1,5 @@
 gpu: 0
-mode: train # preprocessing, classic, train', test',inference
+mode: [preprocessing, train] # preprocessing, classic, train', test',inference
 data_path: /home/evg_sber/PycharmProjects/Samsung_AI/Data/ультра датасет
 log_path: log
 model_path: models
