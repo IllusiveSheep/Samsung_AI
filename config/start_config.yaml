@@ -3,8 +3,8 @@ mode: [preprocessing] # preprocessing, classic, train', test',inference
 data_path: D:\Datasets\Gestures
 log_path: log
 model_path: models
-learning_rate: 0.001
-learning_rate_fusing_coefficient: 0.1
+learning_rate: 0.0001
+learning_rate_fusing_coefficient: 0.01
 weight_decay: 0.0005
 loss_type: MSE #L2, Smooth L1, MSE
 epochs: 200

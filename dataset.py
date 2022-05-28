@@ -33,6 +33,8 @@ class GestureDatasetPics(Dataset):
         self.gesture = {"rock": 0, "paper": 1, "scissors": 2, "goat": 3, "dislike": 4, "like": 5}
         self.gesture1 = {0: "rock", 1: "paper", 2: "scissors", 3: "goat", 4: "dislike", 5: "like"}
         self.df = pd.read_csv(csv_path)
+        self.df = self.df[self.df["class"] != 5]
+        self.df = self.df.reset_index()
         self.x_hands_path = self.df["Path_img"]
         print(self.x_hands_path)
         self.x_dot_hands_path = self.df["Path_dots"]
@@ -41,7 +43,7 @@ class GestureDatasetPics(Dataset):
         # remove ToPILImage-------------------------------------------------------!!!!!!!!!!!!
         self.train_transform = transforms.Compose([transforms.ToPILImage(),
                                                    transforms.RandomHorizontalFlip(),
-                                                   transforms.RandomRotation(degrees=(-45, 45)),
+                                                   transforms.RandomRotation(degrees=(-180, 180)),
                                                    transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4),
                                                    transforms.ToTensor()])
         self.test_transform = transforms.Compose([transforms.ToPILImage(), transforms.ToTensor()])

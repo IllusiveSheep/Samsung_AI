@@ -138,7 +138,7 @@ def train_cnn(config_data, device):
     #                          eps=1e-08,
     #                          weight_decay=config_data.weight_decay)
 
-    scheduler = StepLR(opt, step_size=10, gamma=0.1)
+    scheduler = StepLR(opt, step_size=20, gamma=0.1)
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt,
     #                                                        5,
     #                                                        eta_min=0,
