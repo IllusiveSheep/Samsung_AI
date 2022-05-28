@@ -43,7 +43,8 @@ def train(config_data):
     torch.manual_seed(0)
     torch.cuda.manual_seed(0)
 
-    opt = optim.Adam([{'params': list(model.parameters()), 'lr': config_data.learning_rate}], weight_decay=config_data.weight_decay)
+    opt = optim.Adam([{'params': list(model.parameters()), 'lr': config_data.learning_rate}],
+                     weight_decay=config_data.weight_decay)
     scheduler = StepLR(opt, step_size=10, gamma=0.1)
     loss = nn.CrossEntropyLoss()
 
@@ -99,6 +100,11 @@ def train(config_data):
 
 
 def train_cnn(config_data, device):
+    try:
+        os.mkdir(os.path.join(config_data.model_path))
+    except FileExistsError:
+        pass
+
     model_hand, model_dot_hand = prepare_models("resnet18", "resnet18")
     model_hand = nn.Sequential(*(list(model_hand.children())[:-1]))
     model_dot_hand = nn.Sequential(*(list(model_dot_hand.children())[:-1]))
@@ -116,14 +122,21 @@ def train_cnn(config_data, device):
     for param in model_fuzing_hand.parameters():
         param.requires_grad = True
 
-    loss = torch.nn.CrossEntropyLoss()
+    # loss = torch.nn.CrossEntropyLoss()
+    loss = torch.nn.BCELoss(weight=None, size_average=None, reduce=None, reduction='mean')
+    loss.to(device)
 
-    opt = optim.Adam([{'params': (list(model_hand.parameters()) +
-                                  list(model_dot_hand.parameters())),
-                       'lr': config_data.learning_rate},
-                      {'params': list(model_fuzing_hand.parameters()),
-                       'lr': config_data.learning_rate},
-                      ], weight_decay=config_data.weight_decay)
+    # opt = optim.Adam([{'params': (list(model_hand.parameters()) +
+    #                               list(model_dot_hand.parameters())),
+    #                    'lr': config_data.learning_rate},
+    #                   {'params': list(model_fuzing_hand.parameters()),
+    #                    'lr': config_data.learning_rate},
+    #                   ], weight_decay=config_data.weight_decay)
+    opt = torch.optim.Adamax(params=iter(list(model_hand.parameters()) + list(model_dot_hand.parameters())),
+                             lr=config_data.learning_rate,
+                             betas=(0.9, 0.999),
+                             eps=1e-08,
+                             weight_decay=config_data.weight_decay)
 
     scheduler = StepLR(opt, step_size=10, gamma=0.1)
 
@@ -131,13 +144,14 @@ def train_cnn(config_data, device):
     model_dot_hand = model_dot_hand.to(device)
     model_hand = model_hand.to(device)
 
-    train_dataset = GestureDatasetPics(os.path.join(config_data.data_path, "dots/train_dots.csv"))
-    val_dataset = GestureDatasetPics(os.path.join(config_data.data_path, "dots/test_dots.csv"))
+    train_dataset = GestureDatasetPics(os.path.join(config_data.data_path, "train_dots.csv"))
+    val_dataset = GestureDatasetPics(os.path.join(config_data.data_path, "test_dots.csv"))
 
     train_dataloader = DataLoader(train_dataset, batch_size=config_data.batch_size)
     val_dataloader = DataLoader(val_dataset, batch_size=config_data.batch_size)
 
     for e in range(config_data.epochs):
+        print("epoch = ", e)
 
         model_hand.train()
         model_dot_hand.train()
@@ -158,6 +172,7 @@ def train_cnn(config_data, device):
             hand_prediction = model_hand(x_hand)
             dot_prediction = model_dot_hand(x_dot)
             prediction = model_fuzing_hand(hand_prediction, dot_prediction)
+            prediction = torch.max(prediction.data.cpu(), 1)[1]
 
             prediction_for_metrics = torch.max(prediction.data.cpu(), 1)[1]
             target_for_metrics = y.view(-1).cpu()
@@ -169,8 +184,11 @@ def train_cnn(config_data, device):
                            zero_division='warn')
             # classification += classification_report(y, torch.max(prediction.data, 1)[1],
             #                                         labels=[0, 1, 2, 3, 4, 5])
-            accuracy += accuracy_score(target_for_metrics, prediction_for_metrics,)
-
+            accuracy += accuracy_score(target_for_metrics, prediction_for_metrics, )
+            # print(prediction_for_metrics)
+            # print(prediction)
+            # print(prediction.size())
+            # print(y.size())
             loss_batch = loss(prediction, y) / len(y)
             loss_batch.backward()
             opt.step()
@@ -194,15 +212,10 @@ def train_cnn(config_data, device):
         # print('precision = %.4f' % (precision))
 
         # Save models
-        torch.save(model_hand, os.path.join(config_data.model_path,
-                                            'model_hand',
-                                            'model{0}.pth'.format(e)))
-        torch.save(model_dot_hand, os.path.join(config_data.model_path,
-                                                'model_dot_hand',
-                                                'model{0}.pth'.format(e)))
-        torch.save(model_fuzing_hand, os.path.join(config_data.model_path,
-                                                   'model_fuzing_hand',
-                                                   'model{0}.pth'.format(e)))
+        if e % 5 == 0:
+            torch.save(model_hand, os.path.join(config_data.model_path, 'model_hand_{}.pth'.format(e)))
+            torch.save(model_dot_hand, os.path.join(config_data.model_path, 'model_dot_hand_{}.pth'.format(e)))
+            torch.save(model_fuzing_hand, os.path.join(config_data.model_path, 'model_fuzing_hand_{}.pth'.format(e)))
 
         model_fuzing_hand.eval()
         running_val_loss = 0.0

@@ -33,13 +33,10 @@ class GestureDatasetPics(Dataset):
         self.gesture = {"rock": 0, "paper": 1, "scissors": 2, "goat": 3, "dislike": 4, "like": 5}
         self.gesture1 = {0: "rock", 1: "paper", 2: "scissors", 3: "goat", 4: "dislike", 5: "like"}
         self.df = pd.read_csv(csv_path)
-        self.x_hands_path = self.df["Path"] + "/" + self.df["Image"]
-        self.x_dot_hands_path = self.df["Path"].apply(lambda x: "/".join(x.split("/")[:-3]))[1] + \
-                                "/" + "dots" + \
-                                "/" + \
-                                self.df["class"].apply(lambda y: self.gesture1[y]) + \
-                                "/" + \
-                                self.df["Image"]
+        self.x_hands_path = self.df["Path_img"]
+        print(self.x_hands_path)
+        self.x_dot_hands_path = self.df["Path_dots"]
+        print(self.x_dot_hands_path)
         self.target = list(map(int, list(self.df["class"])))
         # remove ToPILImage-------------------------------------------------------!!!!!!!!!!!!
         self.train_transform = transforms.Compose([transforms.ToPILImage(),
