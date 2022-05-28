@@ -52,9 +52,6 @@ class GestureDatasetPics(Dataset):
     def __getitem__(self, index):
         x_hand = cv2.imread(self.x_hands_path[index])
         x_dot_hand = cv2.imread(self.x_dot_hands_path[index])
-        # print("---")
-        # print(self.x_dot_hands_path[index])
-        # print("---")
         target = self.target[index]
 
         return self.train_transform(x_hand), \

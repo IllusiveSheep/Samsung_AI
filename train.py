@@ -122,23 +122,27 @@ def train_cnn(config_data, device):
     for param in model_fuzing_hand.parameters():
         param.requires_grad = True
 
-    # loss = torch.nn.CrossEntropyLoss()
-    loss = torch.nn.BCELoss(weight=None, size_average=None, reduce=None, reduction='mean')
+    loss = torch.nn.CrossEntropyLoss()
     loss.to(device)
 
-    # opt = optim.Adam([{'params': (list(model_hand.parameters()) +
-    #                               list(model_dot_hand.parameters())),
-    #                    'lr': config_data.learning_rate},
-    #                   {'params': list(model_fuzing_hand.parameters()),
-    #                    'lr': config_data.learning_rate},
-    #                   ], weight_decay=config_data.weight_decay)
-    opt = torch.optim.Adamax(params=iter(list(model_hand.parameters()) + list(model_dot_hand.parameters())),
-                             lr=config_data.learning_rate,
-                             betas=(0.9, 0.999),
-                             eps=1e-08,
-                             weight_decay=config_data.weight_decay)
+    opt = optim.Adam([{'params': (list(model_hand.parameters()) +
+                                  list(model_dot_hand.parameters())),
+                       'lr': config_data.learning_rate},
+                      {'params': list(model_fuzing_hand.parameters()),
+                       'lr': config_data.learning_rate * config_data.learning_rate_fusing_coefficient},
+                      ], weight_decay=config_data.weight_decay)
+
+    # opt = torch.optim.Adamax(params=iter(list(model_hand.parameters()) + list(model_dot_hand.parameters())),
+    #                          lr=config_data.learning_rate,
+    #                          betas=(0.9, 0.999),
+    #                          eps=1e-08,
+    #                          weight_decay=config_data.weight_decay)
 
     scheduler = StepLR(opt, step_size=10, gamma=0.1)
+    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt,
+    #                                                        5,
+    #                                                        eta_min=0,
+    #                                                        last_epoch=-1)
 
     model_fuzing_hand = model_fuzing_hand.to(device)
     model_dot_hand = model_dot_hand.to(device)
@@ -172,7 +176,6 @@ def train_cnn(config_data, device):
             hand_prediction = model_hand(x_hand)
             dot_prediction = model_dot_hand(x_dot)
             prediction = model_fuzing_hand(hand_prediction, dot_prediction)
-            prediction = torch.max(prediction.data.cpu(), 1)[1]
 
             prediction_for_metrics = torch.max(prediction.data.cpu(), 1)[1]
             target_for_metrics = y.view(-1).cpu()
