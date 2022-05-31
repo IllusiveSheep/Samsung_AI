@@ -41,8 +41,9 @@ class HandFuzingModel(torch.nn.Module):
         self.num_hand_features = num_hand_features
         self.num_hand_dots_features = num_hand_dots_features
 
-        self.fc_hand = torch.nn.Linear(512, 128)
-        self.fc_dot_hand = torch.nn.Linear(512, 128)
+        self.fc_hand = torch.nn.Linear(512, 5)
+        self.fc_dot_hand = torch.nn.Linear(512, 5)
+        #можно torch no grad или изменить фузинг
 
         self.bn = torch.nn.BatchNorm1d(5)
         self.dp = torch.nn.Dropout(0.5)

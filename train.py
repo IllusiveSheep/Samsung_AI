@@ -105,22 +105,27 @@ def train_cnn(config_data, device):
     except FileExistsError:
         pass
 
-    model_hand, model_dot_hand = prepare_models("resnet18", "resnet18")
-    model_hand = nn.Sequential(*(list(model_hand.children())[:-1]))
-    model_dot_hand = nn.Sequential(*(list(model_dot_hand.children())[:-1]))
+    usePretrainedFisungModel = False
+
+    if usePretrainedFisungModel:
+        model_hand = torch.load('models/model_hand_120.pth')
+        model_dot_hand = torch.load('models/model_dot_hand_120.pth')
+        model_fuzing_hand = torch.load('models/model_fuzing_hand_120.pth')
+    else:
+        model_hand, model_dot_hand = prepare_models("resnet18", "resnet18")
+        model_hand = nn.Sequential(*(list(model_hand.children())[:-1]))
+        model_dot_hand = nn.Sequential(*(list(model_dot_hand.children())[:-1]))
+        model_fuzing_hand = HandFuzingModel(5, 512, 512)
 
     for param in model_hand.parameters():
         param.requires_grad = True
     for param in model_dot_hand.parameters():
         param.requires_grad = True
-
-    model_fuzing_hand = HandFuzingModel(128, 512, 512)
+    for param in model_fuzing_hand.parameters():
+        param.requires_grad = True
 
     writer_train = SummaryWriter("tensor_board_graphs/train")
     writer_test = SummaryWriter("tensor_board_graphs/test")
-
-    for param in model_fuzing_hand.parameters():
-        param.requires_grad = True
 
     loss = torch.nn.CrossEntropyLoss()
     loss.to(device)
@@ -138,7 +143,7 @@ def train_cnn(config_data, device):
     #                          eps=1e-08,
     #                          weight_decay=config_data.weight_decay)
 
-    scheduler = StepLR(opt, step_size=20, gamma=0.1)
+    scheduler = StepLR(opt, step_size=10, gamma=0.1)
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(opt,
     #                                                        5,
     #                                                        eta_min=0,
@@ -154,7 +159,7 @@ def train_cnn(config_data, device):
     train_dataloader = DataLoader(train_dataset, batch_size=config_data.batch_size)
     val_dataloader = DataLoader(val_dataset, batch_size=config_data.batch_size)
 
-    for e in range(config_data.epochs):
+    for e in range(0, config_data.epochs + 0):
         print("epoch = ", e)
 
         model_hand.train()
