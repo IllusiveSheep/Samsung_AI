@@ -14,4 +14,11 @@ class StartConfig:
     loss_type: str
     epochs: int
     batch_size: int
-    pretrained_models: bool
+    pretrained_image_models: bool
+    pretrained_fusing_model: bool
+    pretrained_image_models_path: str
+    pretrained_dots_model_path: str
+    pretrained_fusing_model_path:  str
+    pretrained_image_model_require_grad: bool
+    pretrained_dots_model_require_grad: bool
+    pretrained_fusing_model_require_grad: bool

@@ -1,7 +1,5 @@
 import torch
 from torch.utils.data import Dataset
-import numpy as np
-import os
 import pandas as pd
 import cv2
 from torchvision import transforms
@@ -40,7 +38,6 @@ class GestureDatasetPics(Dataset):
         self.x_dot_hands_path = self.df["Path_dots"]
         print(self.x_dot_hands_path)
         self.target = list(map(int, list(self.df["class"])))
-        # remove ToPILImage-------------------------------------------------------!!!!!!!!!!!!
         self.train_transform = transforms.Compose([transforms.ToPILImage(),
                                                    transforms.RandomHorizontalFlip(),
                                                    transforms.RandomRotation(degrees=(-180, 180)),
@@ -61,8 +58,3 @@ class GestureDatasetPics(Dataset):
                torch.tensor(target, dtype=torch.long)
 
 
-if __name__ == '__main__':
-    test_dataset = GestureDatasetPics("/Users/illusivesheep/Repositories/ультра датасет/dots/train_dots.csv")
-    hand, dots, label = test_dataset.__getitem__(1)
-    print(hand)
-    print(hand.size())

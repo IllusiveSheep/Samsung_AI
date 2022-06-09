@@ -4,6 +4,8 @@ import numpy as np
 import mediapipe as mp
 import pandas as pd
 
+from functions import make_directory
+
 
 def csv_gen(path_dataset):
     df = pd.DataFrame()
@@ -14,41 +16,21 @@ def csv_gen(path_dataset):
     path_dots = os.path.join(path_dataset, "dots")
     path_images = os.path.join(path_dataset, "images_train_test")
 
-    try:
-        os.mkdir(os.path.join(path_dataset, "dots",))
-    except FileExistsError:
-        pass
-    try:
-        os.mkdir(os.path.join(path_dataset, "crop",))
-    except FileExistsError:
-        pass
-
     for mode in modes:
         path = os.path.join(path_images, mode)
         classes_folders = [folder for folder in os.listdir(path) if "." not in folder and "crop" not in folder]
-
-        try:
-            os.mkdir(os.path.join(path_dataset, "dots", mode))
-        except FileExistsError:
-            pass
-        try:
-            os.mkdir(os.path.join(path_dataset, "crop", mode))
-        except FileExistsError:
-            pass
 
         for folder in classes_folders:
 
             path_folder = os.path.join(path, folder)
             image_names = [image for image in os.listdir(path_folder) if ".jpg" in image]
 
-            try:
-                os.mkdir(os.path.join(path_dataset, "dots", mode, folder))
-            except FileExistsError:
-                pass
-            try:
-                os.mkdir(os.path.join(path_dataset, "crop", mode, folder))
-            except FileExistsError:
-                pass
+            make_directory(path_dataset + "dots")
+            make_directory(path_dataset + "crop")
+            make_directory(path_dataset + "dots" + mode)
+            make_directory(path_dataset + "crop" + mode)
+            make_directory(path_dataset + "dots" + mode + folder)
+            make_directory(path_dataset + "crop" + mode + folder)
 
             for image_name in image_names:
                 print(path_folder + "/" + image_name)

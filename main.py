@@ -1,8 +1,7 @@
 import os
 import torch
 from PreProcess import csv_gen
-from train import train, train_cnn
-from classic_learning import learning
+from train import train_cnn
 
 from config.config_classes import StartConfig
 from utils import get_config_data

@@ -9,4 +9,11 @@ weight_decay: 0.0005
 loss_type: MSE #L2, Smooth L1, MSE
 epochs: 200
 batch_size: 65
-pretrained_models: False
+pretrained_image_models: False
+pretrained_fusing_model: False
+pretrained_image_model_path: models/model_hand_120.pth
+pretrained_dots_model_path: models/model_dot_hand_120.pth
+pretrained_fusing_model_path: models/model_fuzing_hand_120.pth
+pretrained_image_model_require_grad: true
+pretrained_dots_model_require_grad: true
+pretrained_fusing_model_require_grad: true
