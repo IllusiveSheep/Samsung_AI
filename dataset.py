@@ -31,19 +31,19 @@ class GestureDatasetPics(Dataset):
         self.gesture = {"rock": 0, "paper": 1, "scissors": 2, "goat": 3, "dislike": 4, "like": 5}
         self.gesture1 = {0: "rock", 1: "paper", 2: "scissors", 3: "goat", 4: "dislike", 5: "like"}
         self.df = pd.read_csv(csv_path)
-        self.df = self.df[self.df["class"] != 5]
-        self.df = self.df.reset_index()
+        # self.df = self.df[self.df["class"] != 5]
+        # self.df = self.df.reset_index()
         self.x_hands_path = self.df["Path_img"]
         print(self.x_hands_path)
         self.x_dot_hands_path = self.df["Path_dots"]
         print(self.x_dot_hands_path)
         self.target = list(map(int, list(self.df["class"])))
-        self.train_transform = transforms.Compose([transforms.ToPILImage(),
-                                                   transforms.RandomHorizontalFlip(),
-                                                   transforms.RandomRotation(degrees=(-180, 180)),
-                                                   transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4),
-                                                   transforms.ToTensor()])
-        self.test_transform = transforms.Compose([transforms.ToPILImage(), transforms.ToTensor()])
+        self.fuck = transforms.Compose([transforms.ToPILImage(),
+                                        transforms.RandomHorizontalFlip(),
+                                        transforms.RandomRotation(degrees=(-180, 180)),
+                                        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4),
+                                        transforms.ToTensor()])
+        self.to_tensor = transforms.Compose([transforms.ToPILImage(), transforms.ToTensor()])
 
     def __len__(self):
         return len(self.target)
@@ -51,10 +51,15 @@ class GestureDatasetPics(Dataset):
     def __getitem__(self, index):
         x_hand = cv2.imread(self.x_hands_path[index])
         x_dot_hand = cv2.imread(self.x_dot_hands_path[index])
-        target = self.target[index]
+        x_target = self.target[index]
 
-        return self.train_transform(x_hand), \
-               self.train_transform(x_dot_hand), \
-               torch.tensor(target, dtype=torch.long)
+        if self.df["class"][index] == 4 or self.df["class"][index] == 5:
+            x_hand = self.to_tensor(x_hand)
+            x_dot_hand = self.to_tensor(x_dot_hand)
+        else:
+            x_hand = self.fuck(x_hand)
+            x_dot_hand = self.fuck(x_dot_hand)
 
-
+        return x_hand,\
+               x_dot_hand, \
+               torch.tensor(x_target, dtype=torch.long)
