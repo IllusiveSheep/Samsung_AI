@@ -20,11 +20,11 @@ from functions import make_directory
 
 
 def load_models(config_data):
-    if config_data.pretrained_image_models:
+    if config_data.pretrained_image_model:
         model_hand = torch.load(config_data.pretrained_image_model_path)
         model_dot_hand = torch.load(config_data.pretrained_dots_model_path)
     else:
-        model_hand, model_dot_hand = prepare_models("resnet18", "resnet18")
+        model_hand, model_dot_hand = prepare_models()
         model_hand = nn.Sequential(*(list(model_hand.children())[:-1]))
         model_dot_hand = nn.Sequential(*(list(model_dot_hand.children())[:-1]))
 
@@ -35,10 +35,10 @@ def load_models(config_data):
 
     for param in model_hand.parameters():
         param.requires_grad = True
-    for param in model_dot_hand.parameters():
-        param.requires_grad = True
-    for param in model_fuzing_hand.parameters():
-        param.requires_grad = True
+    # for param in model_dot_hand.parameters():
+    #     param.requires_grad = True
+    # for param in model_fuzing_hand.parameters():
+    #     param.requires_grad = True
 
     return model_hand, model_dot_hand, model_fuzing_hand
 

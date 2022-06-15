@@ -5,7 +5,7 @@ from functions import make_directory
 data_path = "D:\Datasets\Gestures_updated"
 
 classes_folders = ["paper", "rock", "like", "dislike", "goat", "scissors"]
-modes = ["train", "test", "validation"]
+modes = ["train", "test", "val"]
 
 make_directory(os.path.join(data_path, 'images_train_test'))
 

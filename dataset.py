@@ -37,10 +37,11 @@ class GestureDatasetPics(Dataset):
         print(self.x_dot_hands_path)
         self.target = list(map(int, list(self.df["class"])))
         self.augmentation = transforms.Compose([transforms.ToPILImage(),
-                                        transforms.RandomHorizontalFlip(),
-                                        transforms.RandomRotation(degrees=(-180, 180)),
-                                        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4),
-                                        transforms.ToTensor()])
+                                                transforms.RandomHorizontalFlip(),
+                                                transforms.RandomRotation(degrees=(-180, 180)),
+                                                transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4),
+                                                transforms.ToTensor(),
+                                                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
         self.to_tensor = transforms.Compose([transforms.ToPILImage(), transforms.ToTensor()])
 
     def __len__(self):

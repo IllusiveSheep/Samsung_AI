@@ -6,6 +6,8 @@ import torch
 def prepare_models(model_hand_name="resnet18", model_dot_hand_name="resnet18", model_path="./"):
     model_hand = models.__dict__[model_hand_name](pretrained=True)
     model_dot_hand = models.__dict__[model_dot_hand_name](pretrained=True)
+    # model_hand = torch.hub.load('pytorch/vision:v0.12.0', 'densenet121', pretrained=True)
+    # model_dot_hand = torch.hub.load('pytorch/vision:v0.12.0', 'densenet121', pretrained=True)
 
     model_hand.cpu()
     model_dot_hand.cpu()

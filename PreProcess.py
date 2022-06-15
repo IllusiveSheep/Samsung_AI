@@ -13,27 +13,26 @@ def csv_gen(path_dataset):
     modes = ["train", "test", "val"]
     gesture = {"rock": 0, "paper": 1, "scissors": 2}
 
+    make_directory(os.path.join(path_dataset, "dots"))
+    make_directory(os.path.join(path_dataset, "crop"))
+
     path_dots = os.path.join(path_dataset, "dots")
     path_images = os.path.join(path_dataset, "images_train_test")
 
     for mode in modes:
         path = os.path.join(path_images, mode)
-        classes_folders = [folder for folder in os.listdir(path) if "." not in folder
-                                                                    and "dislike" not in folder
-                                                                    and "goat" not in folder
-                                                                    and "like" not in folder]
+        classes_folders = [folder for folder in os.listdir(path) if "." not in folder and "dislike" not in folder and "goat" not in folder and "like" not in folder]
+
+        make_directory(os.path.join(path_dataset, "dots", mode))
+        make_directory(os.path.join(path_dataset, "crop", mode))
 
         for folder in classes_folders:
 
             path_folder = os.path.join(path, folder)
             image_names = [image for image in os.listdir(path_folder) if ".jpg" in image]
 
-            make_directory(path_dataset + "dots")
-            make_directory(path_dataset + "crop")
-            make_directory(path_dataset + "dots" + mode)
-            make_directory(path_dataset + "crop" + mode)
-            make_directory(path_dataset + "dots" + mode + folder)
-            make_directory(path_dataset + "crop" + mode + folder)
+            make_directory(os.path.join(path_dataset, "dots", mode, folder))
+            make_directory(os.path.join(path_dataset, "crop", mode, folder))
 
             for image_name in image_names:
                 print(path_folder + "/" + image_name)
@@ -61,28 +60,27 @@ def csv_gen(path_dataset):
 
                                 cv2.circle(blank_image, (X, Y), 1, (255, 255, 255), 3)
 
-                                cv2.imwrite(os.path.join(path_dots, folder, image_name),
-                                            blank_image)
+                                cv2.imwrite(os.path.join(path_dots, folder, image_name), blank_image)
 
                                 X_arr.append(point.x)
                                 Y_arr.append(point.y)
 
-                df = df.append({'Image': image_name,
-                                'Path_dots': os.path.join(path_dataset, "dots", mode, folder, image_name),
-                                'Path_img': os.path.join(path_dataset, "crop", mode, folder, image_name),
-                                # 'landmark_id': i,
-                                # 'X': X,
-                                # 'Y': Y,
-                                # 'Z': point.z,
-                                'class': gesture[folder]}, ignore_index=True)
+                        df = df.append({'Image': image_name,
+                                        'Path_dots': os.path.join(path_dataset, "dots", mode, folder, image_name),
+                                        'Path_img': os.path.join(path_dataset, "crop", mode, folder, image_name),
+                                        # 'landmark_id': i,
+                                        # 'X': X,
+                                        # 'Y': Y,
+                                        # 'Z': point.z,
+                                        'class': gesture[folder]}, ignore_index=True)
 
-                cv2.imwrite(os.path.join(path_dataset, "dots", mode, folder, image_name), blank_image)
-                image_crop = cv2.imread(os.path.join(path_folder, image_name))
-                height, width, channels = image_crop.shape
-                image_crop = image_crop[int(min(Y_arr) * height):int(max(Y_arr) * height),
-                                        int(min(X_arr) * width):int(max(X_arr) * width)]
-                image_crop = cv2.resize(image_crop, dsize=(224, 224))
-                cv2.imwrite(os.path.join(path_dataset, "crop", mode, folder, image_name), image_crop)
+                        cv2.imwrite(os.path.join(path_dataset, "dots", mode, folder, image_name), blank_image)
+                        image_crop = cv2.imread(os.path.join(path_folder, image_name))
+                        height, width, channels = image_crop.shape
+                        image_crop = image_crop[int((min(Y_arr) - 0.1) * height):int((max(Y_arr) + 0.1) * height),
+                                                int((min(X_arr) - 0.1) * width):int((max(X_arr) + 0.1) * width)]
+                        image_crop = cv2.resize(image_crop, dsize=(224, 224))
+                        cv2.imwrite(os.path.join(path_dataset, "crop", mode, folder, image_name), image_crop)
 
         # df[["class", "landmark_id", "X", "Y"]] = df[["class", "landmark_id", "X", "Y"]].astype(int)
         df.to_csv(os.path.join(path_dataset, f"{mode}_dots.csv"))
