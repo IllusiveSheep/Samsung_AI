@@ -31,7 +31,7 @@ def load_models(config_data):
     if config_data.pretrained_fusing_model:
         model_fuzing_hand = torch.load(config_data.pretrained_fusing_model_path)
     else:
-        model_fuzing_hand = HandFuzingModel(5, 512, 512)
+        model_fuzing_hand = HandFuzingModel(3, 512, 512)
 
     for param in model_hand.parameters():
         param.requires_grad = True

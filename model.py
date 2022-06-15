@@ -41,14 +41,14 @@ class HandFuzingModel(torch.nn.Module):
         self.num_hand_features = num_hand_features
         self.num_hand_dots_features = num_hand_dots_features
 
-        self.fc_hand = torch.nn.Linear(512, 5)
-        self.fc_dot_hand = torch.nn.Linear(512, 5)
+        self.fc_hand = torch.nn.Linear(num_hand_features, n_hidden_neurons)
+        self.fc_dot_hand = torch.nn.Linear(num_hand_dots_features, n_hidden_neurons)
         #можно torch no grad или изменить фузинг
 
-        self.bn = torch.nn.BatchNorm1d(5)
+        self.bn = torch.nn.BatchNorm1d(n_hidden_neurons)
         self.dp = torch.nn.Dropout(0.5)
         self.activation = torch.nn.ReLU()
-        self.fc = torch.nn.Linear(2*n_hidden_neurons, 5)
+        self.fc = torch.nn.Linear(2*n_hidden_neurons, n_hidden_neurons)
 
     def forward(self, x_hand, x_dots_hand):
         hand_feautures = x_hand.view(-1, self.num_hand_features)

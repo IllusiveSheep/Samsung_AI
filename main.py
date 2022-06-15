@@ -1,7 +1,7 @@
 import os
 import torch
 from PreProcess import csv_gen
-from train import train_cnn
+# from train import train_cnn
 
 from config.config_classes import StartConfig
 from utils import get_config_data
@@ -25,9 +25,11 @@ def start_mode():
 
     # _ = start_modes[start_config.mode]
 
-    # csv_gen(start_config.data_path)
+    print('okaloka')
 
-    train_cnn(start_config, device)
+    csv_gen(start_config.data_path)
+
+    # train_cnn(start_config, device)
 
 
 if __name__ == '__main__':

@@ -28,17 +28,15 @@ class GestureDatasetPics(Dataset):
 
     def __init__(self, csv_path):
         super(GestureDatasetPics, self).__init__()
-        self.gesture = {"rock": 0, "paper": 1, "scissors": 2, "goat": 3, "dislike": 4, "like": 5}
-        self.gesture1 = {0: "rock", 1: "paper", 2: "scissors", 3: "goat", 4: "dislike", 5: "like"}
+        self.gesture = {"rock": 0, "paper": 1, "scissors": 2}
+        self.gesture1 = {0: "rock", 1: "paper", 2: "scissors"}
         self.df = pd.read_csv(csv_path)
-        # self.df = self.df[self.df["class"] != 5]
-        # self.df = self.df.reset_index()
         self.x_hands_path = self.df["Path_img"]
         print(self.x_hands_path)
         self.x_dot_hands_path = self.df["Path_dots"]
         print(self.x_dot_hands_path)
         self.target = list(map(int, list(self.df["class"])))
-        self.fuck = transforms.Compose([transforms.ToPILImage(),
+        self.augmentation = transforms.Compose([transforms.ToPILImage(),
                                         transforms.RandomHorizontalFlip(),
                                         transforms.RandomRotation(degrees=(-180, 180)),
                                         transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4),
@@ -53,12 +51,8 @@ class GestureDatasetPics(Dataset):
         x_dot_hand = cv2.imread(self.x_dot_hands_path[index])
         x_target = self.target[index]
 
-        if self.df["class"][index] == 4 or self.df["class"][index] == 5:
-            x_hand = self.to_tensor(x_hand)
-            x_dot_hand = self.to_tensor(x_dot_hand)
-        else:
-            x_hand = self.fuck(x_hand)
-            x_dot_hand = self.fuck(x_dot_hand)
+        x_hand = self.augmentation(x_hand)
+        x_dot_hand = self.augmentation(x_dot_hand)
 
         return x_hand,\
                x_dot_hand, \

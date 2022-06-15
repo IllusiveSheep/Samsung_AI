@@ -11,14 +11,17 @@ def csv_gen(path_dataset):
     df = pd.DataFrame()
 
     modes = ["train", "test", "val"]
-    gesture = {"rock": 0, "paper": 1, "scissors": 2, "goat": 3, "dislike": 4, "like": 5}
+    gesture = {"rock": 0, "paper": 1, "scissors": 2}
 
     path_dots = os.path.join(path_dataset, "dots")
     path_images = os.path.join(path_dataset, "images_train_test")
 
     for mode in modes:
         path = os.path.join(path_images, mode)
-        classes_folders = [folder for folder in os.listdir(path) if "." not in folder and "crop" not in folder]
+        classes_folders = [folder for folder in os.listdir(path) if "." not in folder
+                                                                    and "dislike" not in folder
+                                                                    and "goat" not in folder
+                                                                    and "like" not in folder]
 
         for folder in classes_folders:
 

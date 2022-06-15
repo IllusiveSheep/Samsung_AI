@@ -1,6 +1,6 @@
 gpu: 0
 mode: [preprocessing] # preprocessing, classic, train', test',inference
-data_path: D:\Datasets\Gestures
+data_path: D:\Datasets\Gestures_updated
 log_path: log
 model_path: models
 learning_rate: 0.00001
