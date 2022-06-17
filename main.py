@@ -1,45 +1,34 @@
 import os
-import argparse
-from PreProcess import npy_gen
-from train import train, train_cnn
+import torch
+from PreProcess import csv_gen
+from train import train_cnn
 from classic_learning import learning
 
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--gpu', type=int, default=0, help='gpu id')
-    parser.add_argument('--mode', type=str, default="train", choices=['preprocessing',
-                                                                      'classic',
-                                                                      'train',
-                                                                      'test',
-                                                                      'inference'],
-                        help='Mode')
-    parser.add_argument('--data_path', type=str, default="/Users/illusivesheep/Repositories/ультра датасет",
-                        required=False,
-                        help='Path to npy files')
-    parser.add_argument('--log_path', type=str, default="log", required=False,
-                        help='Path to log directory')
-    parser.add_argument('--model_path', type=str, default='models', help='Name of the directory to save models')
-    parser.add_argument('--learning_rate', type=float, default=0.0001)
-    parser.add_argument('--weight_decay', type=float, default=5e-4)
-    parser.add_argument('--loss_type', type=str, default='MSE', choices=['L2', 'Smooth L1', 'MSE'],
-                        help='type of continuous loss')
-    parser.add_argument('--epochs', type=int, default=200)
-    parser.add_argument('--batch_size', type=int, default=128)
-    parser.add_argument('--pretrained_models', type=bool, default=False)
-    # Generate args
-    args = parser.parse_args()
-    return args
+from config.config_classes import StartConfig
+from utils import get_config_data
 
 
 def start_mode():
-    args = parse_args()
-    if args.mode == "preprocessing":
-        npy_gen(args.data_path)
-    elif args.mode == "train":
-        train_cnn(args)
-    elif args.mode == "classic":
-        learning(args)
+    start_config = StartConfig(**get_config_data(os.path.join(os.environ['CFG_PATH'], os.environ['START_CFG_NAME'])))
+    device = torch.device(start_config.gpu)
+    # start_modes = {"preprocessing": csv_gen(start_config.data_path),
+    #                "train": train_cnn(start_config, device),
+    #                "classic": learning(start_config)}
+
+    # path_dataset = start_config.data_path
+    # path_images = os.path.join(path_dataset, "images_train_test")
+    # path = os.path.join(path_images, "train")
+    # classes_folders = [folder for folder in os.listdir(path) if "." not in folder and "crop" not in folder]
+    # path_folder = os.path.join(path, classes_folders[0])
+    # image_names = [image for image in os.listdir(path_folder) if ".jpg" in image]
+    # print(classes_folders)
+    # print(len(image_names))
+
+    # _ = start_modes[start_config.mode]
+
+    # csv_gen(start_config.data_path)
+
+    train_cnn(start_config, device)
 
 
 if __name__ == '__main__':
