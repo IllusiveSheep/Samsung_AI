@@ -3,17 +3,17 @@ from torch import nn
 import numpy as np
 
 
-class GestureModel(torch.nn.Module):
+class DotsGestureModel(torch.nn.Module):
 
     def __init__(self, n_hidden_neurons):
-        super(GestureModel, self).__init__()
-
+        super(DotsGestureModel, self).__init__()
+        self.in_features = 100
         self.d = nn.Dropout(p=0.5)
         self.activation = torch.nn.ReLU()
-        self.fc1 = torch.nn.Linear(21 * 3, n_hidden_neurons)
+        self.fc1 = torch.nn.Linear(21 * 2, n_hidden_neurons)
         self.bn1 = nn.BatchNorm1d(n_hidden_neurons)
-        self.fc2 = torch.nn.Linear(n_hidden_neurons, 6)
-        self.bn2 = nn.BatchNorm1d(6)
+        self.fc2 = torch.nn.Linear(n_hidden_neurons, 100)
+        self.bn2 = nn.BatchNorm1d(100)
 
     def forward(self, x):
         x = x.view(x.shape[0], -1)
@@ -23,11 +23,11 @@ class GestureModel(torch.nn.Module):
 
 
 def test_model():
-    model = GestureModel(100)
+    model = DotsGestureModel(100)
 
     print(model)
 
-    x_test = torch.tensor(np.load("/Users/illusivesheep/Repositories/data/test_coords.npy")[1], dtype=torch.float32)
+    x_test = torch.tensor(np.load("D:\Datasets\Gestures\\test_dots.npy")[1], dtype=torch.float32)
     x_test = torch.unsqueeze(x_test, 0)
     model.eval()
     with torch.no_grad():
@@ -41,13 +41,14 @@ class HandFuzingModel(torch.nn.Module):
         self.num_hand_features = num_hand_features
         self.num_hand_dots_features = num_hand_dots_features
 
-        self.fc_hand = torch.nn.Linear(512, 128)
-        self.fc_dot_hand = torch.nn.Linear(512, 128)
+        self.fc_hand = torch.nn.Linear(num_hand_features, n_hidden_neurons)
+        self.fc_dot_hand = torch.nn.Linear(num_hand_dots_features, n_hidden_neurons)
+        #можно torch no grad или изменить фузинг
 
-        self.bn = torch.nn.BatchNorm1d(6)
+        self.bn = torch.nn.BatchNorm1d(5)
         self.dp = torch.nn.Dropout(0.5)
         self.activation = torch.nn.ReLU()
-        self.fc2 = torch.nn.Linear(2*n_hidden_neurons, 6)
+        self.fc = torch.nn.Linear(2*n_hidden_neurons, 5)
 
     def forward(self, x_hand, x_dots_hand):
         hand_feautures = x_hand.view(-1, self.num_hand_features)
@@ -59,7 +60,7 @@ class HandFuzingModel(torch.nn.Module):
 
         fuze = torch.cat((hand_feautures, hand_dots_feautures), 1)#.view(-1, 128)
 
-        fuze_out = self.activation(self.bn(self.fc2(fuze)))
+        fuze_out = self.activation(self.bn(self.fc(fuze)))
         # fuze_out = self.dp(fuze_out)
 
         return fuze_out
